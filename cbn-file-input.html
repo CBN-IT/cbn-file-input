@@ -1,0 +1,438 @@
+<!--
+`cbn-file-input`
+
+@demo demo/index.html
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../paper-button/paper-button.html" />
+<link rel="import" href="../iron-icon/iron-icon.html" />
+<link rel="import" href="../iron-icons/iron-icons.html" />
+<link rel="import" href="../cbn-form/lib/include.html" />
+<link rel="import" href="styles.html" />
+
+<dom-module id="cbn-file-input">
+	<template>
+		<style include="cbn-file-input-pstyles"></style>
+		
+		<div id="container" class$="_computeContainerClasses(listPosition)">
+			<div id="inputContainer">
+				<template is="dom-if" if="[[_computeShowChips(multiple, showChips)]]">
+					<template is="dom-repeat" items="[[files]]" as="item">
+						<div class$="[[_computeFileItemClasses(item)]]">
+							<span>[[_computeFileLabel(item.label, maxLabelLength)]]</span>
+							<a class="removeBtn" on-tap="_removeFile">
+								<iron-icon icon="icons:backspace"></iron-icon>
+							</a>
+						</div>
+					</template>
+				</template>
+				
+				<div class="inner">
+					<input id="displayInput" class="input" type="text" readonly
+						   title="[[placeholder]]" placeholder$="[[placeholder]]"
+						   value$="[[_computeDisplayValue(multiple, showChips, files.*)]]"
+						   on-key-press="_inputKeyPressed" on-tap="open"/>
+					<paper-button class="upload-button" on-tap="open" raised>
+						<iron-icon icon="[[buttonIcon]]" class$="[[_computeButtonIconClasses(buttonIcon)]]"></iron-icon>
+						[[buttonText]]
+					</paper-button>
+				</div>
+			</div>
+			
+			<div id="files">
+				
+			</div>
+		</div>
+		
+		<div class="hidden-file">
+			<input id="fileInput" type="file" on-change="_fileChosen" multiple$="[[multiple]]" />
+		</div>
+		
+	</template>
+</dom-module>
+
+<script>
+	//noinspection JSUnusedGlobalSymbols
+	Polymer({
+		is: 'cbn-file-input',
+		
+		properties: {
+			
+			/**
+			 * File input's value is an object that contains file data & metadata.
+			 *
+			 * If the `multiple` property is true, this value will be an array of objects.
+			 * 
+			 * See `objPropMap` for a description of the expected model objects and how they can be customized.
+			 */
+			value: {
+				type: Object,
+				value: null,
+				observer: '_valueChanged'
+			},
+			
+			/**
+			 * An object that describes how to map the file objects to the model object properties and vice-versa.
+			 * 
+			 * The following key mappings can be defined:
+			 * - 'data': the property to use for putting the File object;
+			 * - 'label': the model object property to use for displaying the label;
+			 * - 'size': the property representing the size of the uploaded file (must be in bytes);
+			 * - 'type': the property containing the type of the file;
+			 * 
+			 * Note: there are two types of conversions that will be taking place:
+			 * - selected but not-yet-uploaded files: the `data` field will be set on a empty model object;
+			 * - already uploaded file: the `label`, `size` and `type` of the model object will be used for displaying onto
+			 *   the UI.
+			 * 
+			 * Note: the 'data' key must be set in order for the upload to work!
+			 */
+			objPropMap: {
+				type: Object,
+				value: function () {
+					return {
+						"label": "name",
+						"size": "size",
+						"type": "type",
+						"data": null
+					};
+				}
+			},
+			
+			/**
+			 * Whether to force showing the uploaded files as chips (even for single file inputs).
+			 */
+			showChips: {
+				type: Boolean,
+				value: false
+			},
+			
+			/**
+			 * The text to display to the upload button. If empty, no text will be displayed.
+			 */
+			buttonText: {
+				type: String,
+				value: ''
+			},
+			
+			/**
+			 * The icon to display next to the upload button.
+			 */
+			buttonIcon: {
+				type: String,
+				value: 'file-upload'
+			},
+			
+			/**
+			 * The maximum length of a filename label.
+			 */
+			maxLabelLength: {
+				type: Number,
+				value: 30
+			},
+			
+			/**
+			 * The position of the uploaded files list (only when `multiple` is set).
+			 */
+			listPosition: {
+				type: String,
+				value: 'bottom'
+			},
+			
+			/**
+			 * Contains normalized FileMeta objects for the uploaded files.
+			 */
+			files: {
+				type: Array,
+				notify: true, // make it available for external elements
+				value: function() { return []; }
+			}
+			
+		},
+		
+		behaviors: [
+			CbnForm.FileInputElement,
+			CbnForm.Validatable
+		],
+		
+		/**
+		 * Element's dynamic attributes.
+		 */
+		dynamicAttributes: {
+			"showChips": { type: 'attribute' },
+			"objPropMap": { type: 'property' },
+			"buttonText": { type: 'property' },
+			"buttonIcon": { type: 'property' },
+			"listPosition": { type: 'property' },
+			"placeholder": { type: 'attribute' }
+		},
+		
+		observers: [
+			'_filesChanged(files.splices)'
+		],
+		
+		/**
+		 * Will be true while the files / model value is changed internally.
+		 */
+		_filesInternallyChanged: false,
+		
+		/**
+		 * Lock object set while the value is processed inside the valueChanged observer.
+		 */
+		_valueIsBeingProcessed: false,
+		
+		
+		// File chooser UI / handling
+		
+		/**
+		 * Opens the file chooser.
+		 * 
+		 * Only usable inside trusted event contexts like click (because of browser restrictions).
+		 */
+		open: function() {
+			this.$.fileInput.click();
+		},
+		
+		/**
+		 * Called when a key is pressed on the file input.
+		 * 
+		 * Handles the Return key: open the file chooser.
+		 */
+		_inputKeyPressed: function(event) {
+			if (event.which == '13') {
+				event.preventDefault();
+				this.open();
+			}
+		},
+		
+		/**
+		 * File input changed event, called when a file is chosen from the dialog.
+		 * 
+		 * @param {Event} event The input change event.
+		 */
+		_fileChosen: function(event) {
+			if (event)
+				event.stopPropagation();
+			
+			this._addFiles(this.$.fileInput.files);
+			this.$.fileInput.value = '';
+		},
+		
+		/**
+		 * Handler for the remove file button tap event.
+		 * 
+		 * @param {Event} event The tap event.
+		 */
+		_removeFile: function(event) {
+			var index = event.model.index;
+			this.splice('files', index, 1);
+		},
+		
+		// Model value effects
+		
+		/**
+		 * Adds a file to the internal files collection.
+		 * 
+		 * @param {FileList} files The files to add (a DOM FileList object).
+		 */
+		_addFiles: function(files) {
+			var i;
+			var filesMeta = [];
+			
+			// Note: files is a pseudo-array, so don't use Array.isArray here!
+			if (files && files.length) {
+				for (i=0; i<files.length; i++) {
+					filesMeta.push({
+						data: files[i],
+						label: files[i].name,
+						size: files[i].size,
+						type: files[i].type
+					});
+				}
+			}
+			
+			if (this.multiple) {
+				this.splice.apply(this, [ 'files', this.files.length, 0 ].concat(filesMeta));
+			} else {
+				// clamp the number of files
+				this.files = [ filesMeta[0] ];
+			}
+		},
+		
+		/**
+		 * Call when the files array gets changed to update the model value.
+		 */
+		_filesChanged: function() {
+			if (this._valueIsBeingProcessed)
+				return;
+			
+			try {
+				this._filesInternallyChanged = true;
+				
+				// convert file meta objects to model value
+				var values = [];
+				this.files.forEach(function(fileMeta) {
+					var valueObj = {};
+					if (fileMeta.obj) {
+						valueObj = JSON.parse(JSON.stringify(fileMeta.obj));
+					} else {
+						if (this.objPropMap.data) {
+							valueObj[this.objPropMap.data] = fileMeta.data;
+						} else {
+							valueObj = fileMeta.data;
+						}
+					}
+					
+					values.push(valueObj);
+				}, this);
+				if (!this.multiple) {
+					values = (values.length? values[0] : null);
+				}
+				
+				this._setIndirectValue(values);
+				
+			} finally {
+				this._filesInternallyChanged = false;
+			}
+		},
+		
+		/**
+		 * Called when the input's model value is changed to update the internal files object.
+		 */
+		_valueChanged: function() {
+			if (this._filesInternallyChanged) 
+				return;
+			
+			// convert model value to file meta objects
+			var values = this.value;
+			if (!this.multiple) {
+				values = [];
+				if (this.value)
+					values.push(this.value);
+			} else if (!this.value) {
+				values = [];
+			}
+			var files = [];
+			values.forEach(function(val) {
+				var fileMeta = {};
+				if (val.data && val.data instanceof Blob) {
+					// we have a File blob, yet to be uploaded
+					var data = val;
+					if (this.objPropMap.data) {
+						data = val[this.objPropMap.data];
+					}
+					fileMeta.data = data;
+					fileMeta.label = data.name;
+					fileMeta.size = data.size;
+					fileMeta.type = data.type;
+					
+				} else {
+					fileMeta.obj = val;
+					if (this.objPropMap.label)
+						fileMeta.label = val[this.objPropMap.label];
+					if (this.objPropMap.size)
+						fileMeta.size = val[this.objPropMap.size];
+					if (this.objPropMap.type)
+						fileMeta.type = val[this.objPropMap.type];
+				}
+				files.push(fileMeta);
+			}, this);
+			try {
+				this._valueIsBeingProcessed = true;
+				this.files = files;
+				
+				
+			} finally {
+				this._valueIsBeingProcessed = false;
+			}
+		},
+		
+		
+		// Computed properties
+		
+		/**
+		 * Computes whether to display the uploaded files as chips.
+		 * @param {Boolean} multiple True if the input accepts multiple files.
+		 * @param {Boolean} showChips True if showing chips is forced.
+		 * @return {Boolean} Whether to show chips with the uploaded files.
+		 */
+		_computeShowChips: function(multiple, showChips) {
+			return multiple || showChips;
+		},
+		
+		/**
+		 * Computes the text to display inside the .
+		 * @param {Boolean} multiple True if the input accepts multiple files.
+		 * @param {Boolean} showChips True if showing chips is forced.
+		 * @return {String} The text to display inside the input (the uploaded file's name or empty string)
+		 */
+		_computeDisplayValue: function(multiple, showChips) {
+			if (this._computeShowChips(multiple, showChips))
+				return ''; // currently uploaded file is shown as chip
+			if (!this.files.length)
+				return '';
+			return (this.files[0].label ? this.files[0].label: '' );
+		},
+		
+		/**
+		 * Computes the classes for the #container element (which contains the files list and the input 
+		 * element).
+		 * 
+		 * @param {String} listPosition The position of the files list.
+		 * @returns {String}
+		 */
+		_computeContainerClasses: function(listPosition) {
+			if (listPosition == 'top') {
+				return 'reverse';
+			}
+			return '';
+		},
+		
+		/**
+		 * Computes the chip classes of a file meta object.
+		 */
+		_computeFileItemClasses: function(file) {
+			return 'file';
+		},
+		
+		/**
+		 * Computes a shortened filename for displaying inside the chips.
+		 * 
+		 * @param {String} label The original file name / label.
+		 * @return {String} The shortened label.
+		 */
+		_computeFileLabel: function(label, maxLength) {
+			if (!label) return '';
+			if (label.length > maxLength) {
+				var filename = /^(.+)(\.[a-zA-Z0-9_-]+)$/.exec(label);
+				if (filename) {
+					label = filename[1].substring(0, maxLength - filename[2].length) + "\u2026 " + filename[2];
+				} else {
+					label = label.substring(0, maxLength) + "\u2026";
+				}
+			}
+			return label;
+		},
+		
+		/**
+		 * Computes classes for the upload icon (whether to hide it or not).
+		 * 
+		 * @param {String} buttonIcon The name of the icon.
+		 * @returns {String}
+		 */
+		_computeButtonIconClasses: function(buttonIcon) {
+			if (!buttonIcon)
+				return "hidden";
+			return '';
+		}
+		
+	});
+	
+	CbnForm.registerElement('cbn-file-input', {
+		types: [ 'file' ],
+		priority: 1
+	});
+	
+</script>

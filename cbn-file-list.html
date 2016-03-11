@@ -1,0 +1,37 @@
+<!--
+`cbn-file-list` handles the 
+
+@demo demo/index.html
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="styles.html" />
+
+<dom-module id="cbn-file-lit">
+	<template>
+		<style include="cbn-file-list-pstyles"></style>
+		
+		<div id="files">
+			
+		</div>
+		
+	</template>
+</dom-module>
+
+<script>
+	//noinspection JSUnusedGlobalSymbols
+	Polymer({
+		is: 'cbn-file-list',
+		
+		properties: {
+			
+			files: {
+				type: Array,
+				value: function() { return []; }
+			}
+			
+		},
+		
+	});
+</script>

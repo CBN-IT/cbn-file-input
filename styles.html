@@ -1,0 +1,145 @@
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-styles/shadow.html">
+
+<dom-module id="cbn-file-input-pstyles"><template><style>
+	
+	:host {
+		display: block;
+	}
+	
+	#container {
+		@apply(--layout-vertical);
+	}
+	#container.reverse {
+		@apply(--layout-vertical-reverse);
+	}
+	
+	#inputContainer {
+		@apply(--layout-horizontal);
+		@apply(--layout-end);
+		@apply(--layout-end-aligned);
+	}
+	#inputContainer input.upload {
+		display: block;
+	}
+	
+	#inputContainer .inner {
+		@apply(--layout-horizontal);
+		@apply(--layout-flex);
+		@apply(--layout-end);
+		@apply(--layout-end-aligned);
+	}
+	
+	/* The container for all element's components */
+	#inputContainer {
+		@apply(--layout-horizontal);
+		@apply(--layout-center);
+		@apply(--layout-wrap);
+		
+		position: relative;
+		outline: none;
+		
+		@apply(--cbn-select-container);
+	}
+	#inputContainer:hover {
+		cursor: text;
+	}
+	
+	/* 
+	 * Selected items' bubbles.
+	 */
+	#inputContainer .file {
+		@apply(--layout-horizontal);
+		@apply(--layout-center);
+		
+		/*font-size: 0.9em;*/
+		color: #333333;
+		background: #E7E7E7;
+		padding: 0.0em 0.5em;
+		margin: 0.1em 0.2em 0.15em 0;
+		line-height: 17px;
+		vertical-align: middle;
+		cursor: pointer;
+		border-radius: 0.7em;
+		overflow: hidden;
+		white-space: nowrap;
+		@apply(--cbn-file-item);
+	}
+	
+	#inputContainer .file:hover {
+		background: #EFEFEF;
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.37);
+		@apply(--cbn-file-item-hover);
+	}
+	
+	#inputContainer .file > span {
+		overflow: hidden;
+		flex: 1;
+	}
+	
+	/* Remove selection button */
+	#inputContainer .file .removeBtn {
+		margin-left: 3px;
+		display: inline-flex;
+		vertical-align: middle;
+	}
+	
+	#inputContainer .file .removeBtn > iron-icon {
+		height: 14px;
+		width: 14px;
+		margin-bottom: 1px;
+		fill: #666666;
+	}
+	#inputContainer .file .removeBtn:hover > iron-icon {
+		fill: #FF0000;
+	}
+	
+	/*
+	 * The input extends to the length of the element.
+	 */
+	#inputContainer input#displayInput {
+		display: block;
+		flex: 1 1;
+		border: none;
+		box-sizing: border-box;
+		outline: none;
+		vertical-align: middle;
+		min-width: 4em;
+		padding: 0 14px 0 0;
+		font: inherit;
+		background-color: transparent;
+		@apply(--cbn-file-display-input);
+	}
+	
+	#inputContainer paper-button.upload-button {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		min-width: 0;
+		padding: 0 5px 0 5px;
+		margin: 0 0 3px 0;
+		height: 26px;
+		line-height: 26px;
+		overflow: hidden;
+		color: white;
+		font-size: 0.85em;
+		background-color: var(--google-blue-500);
+	}
+	
+	#inputContainer paper-button.upload-button iron-icon {
+		width: 20px;
+		height: 20px;
+		margin: 3px 0;
+	}
+	
+	.hidden-file {
+		position: absolute;
+		visibility: hidden;
+		left: -9999px;
+	}
+	
+	.hidden {
+		display: none;
+	}
+	
+</style></template></dom-module>
