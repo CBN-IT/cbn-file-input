@@ -143,3 +143,33 @@
 	}
 	
 </style></template></dom-module>
+
+<dom-module id="cbn-file-progress-pstyles"><template><style>
+	
+	:host {
+		display: block;
+		float: left;
+		width: 100%;
+		margin-top: 2px;
+	}
+	
+	paper-progress {
+		display: none;
+		width: 100%;
+	}
+	paper-progress.uploading {
+		display: block;
+		--paper-progress-active-color: var(--paper-light-blue-500);
+		--paper-progress-secondary-color: var(--paper-light-blue-100);
+	}
+	paper-progress.completed {
+		display: block;
+		--paper-progress-active-color: var(--paper-light-green-500);
+		--paper-progress-secondary-color: var(--paper-light-green-100);
+	}
+	paper-progress.indeterminate {
+		--paper-progress-active-color: var(--paper-orange-500);
+		--paper-progress-secondary-color: var(--paper-orange-100);
+	}
+	
+</style></template></dom-module>

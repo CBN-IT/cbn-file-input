@@ -19,6 +19,7 @@ style this element.
 <link rel="import" href="../paper-input/paper-input-error.html">
 
 <link rel="import" href="cbn-file-input.html">
+<link rel="import" href="cbn-file-input-progress.html">
 
 <dom-module id="cbn-paper-file-input">
 	<template>
@@ -44,10 +45,17 @@ style this element.
 							placeholder$="[[placeholder]]"
 							validation="[[validation]]" validation-order="[[validationOrder]]" 
 							validation-type="[[validationType]]" default-validation-message="[[defaultValidationMessage]]"
+							uploading="{{uploading}}" upload-indeterminate="{{uploadIndeterminate}}"
+							total-upload-size="{{totalUploadSize}}" uploaded-size="{{uploadedSize}}"
 				></cbn-file-input>
 			
 			<template is="dom-if" if="[[errorMessage]]">
 				<paper-input-error>[[errorMessage]]</paper-input-error>
+			</template>
+			
+			<template is="dom-if" if="[[!noProgress]]">
+				<cbn-file-input-progress uploading="[[uploading]]" upload-indeterminate="[[uploadIndeterminate]]"
+						total-upload-size="[[totalUploadSize]]" uploaded-size="[[uploadedSize]]"></cbn-file-input-progress>
 			</template>
 		
 		</paper-input-container>
@@ -95,6 +103,30 @@ style this element.
 			files: {
 				type: Array,
 				notify: true
+			},
+			
+			/**
+			 * Set to disable the progress bar addon while the file is being uploaded to the server.
+			 */
+			noProgress: {
+				type: Boolean,
+				value: false
+			},
+			
+			uploading: {
+				type: Boolean
+			},
+			
+			uploadIndeterminate: {
+				type: Boolean
+			},
+			
+			totalUploadSize: {
+				type: Number
+			},
+			
+			uploadedSize: {
+				type: Number
 			},
 			
 			_ariaLabelledBy: {

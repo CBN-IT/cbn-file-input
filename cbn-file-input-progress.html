@@ -1,0 +1,110 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-styles/typography.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
+<link rel="import" href="../paper-input/paper-input-addon-behavior.html">
+
+<link rel="import" href="styles.html" />
+
+<!--
+`<cbn-file-input-progress>` is a progress indicator addon for use with `<cbn-file-input>`. It is automatically included 
+in all `<cbn-paper-file-input>` elements.
+
+### Styling
+
+The following properties are available for styling:
+
+Custom property                 | Description                            | Default
+--------------------------------|----------------------------------------|----------
+`--cbn-file-progress-color`     | The color of the progress bar          | ``
+`--cbn-file-progress-completed` | The color when the upload is completed | ``
+-->
+<dom-module id="cbn-file-input-progress">
+	<template>
+		<style include="cbn-file-progress-pstyles"></style>
+		
+		<paper-progress id="progress"
+						value="[[uploadedSize]]" min="0" max="[[totalUploadSize]]"
+						indeterminate$="[[uploadIndeterminate]]"></paper-progress>
+	</template>
+</dom-module>
+
+<script>
+	Polymer({
+		is: 'cbn-file-input-progress',
+		
+		behaviors: [
+			Polymer.PaperInputAddonBehavior
+		],
+		
+		properties: {
+			
+			/**
+			 * Whether the file(s) is/are currently being uploaded.
+			 */
+			uploading: {
+				type: Boolean
+			},
+			
+			/**
+			 * Whether the upload progress is currently indeterminate.
+			 */
+			uploadIndeterminate: {
+				type: Boolean
+			},
+			
+			/**
+			 * The total size (bytes) of the files to be uploaded. Used for progress events.
+			 *
+			 * Automatically calculated when the value objects are set.
+			 */
+			totalUploadSize: {
+				type: Number
+			},
+			
+			/**
+			 * The amount of bytes currently uploaded.
+			 *
+			 * Automatically calculated during `cbn-form`'s progress events.
+			 */
+			uploadedSize: {
+				type: Number
+			}
+			
+		},
+		
+		observers: [
+			'_updateProgressClasses(uploading, uploadIndeterminate, totalUploadSize, uploadedSize)'
+		],
+		
+		ready: function() {
+			this._updateProgressClasses();
+		},
+		
+		/**
+		 * Override PaperInputAddonBehavior's update function to update the progress.
+		 * 
+		 * @param {Object} state The input's state.
+		 */
+		update: function (state) {
+/*			if (!state.inputElement) {
+				return;
+			}*/
+		},
+		
+		/**
+		 * Computes the visibility of the progress bar and its color classes.
+		 */
+		_updateProgressClasses: function() {
+			if (!this.$.progress) return;
+			
+			this.toggleClass('indeterminate', this.uploadIndeterminate, this.$.progress);
+			var completed = this.uploading && (this.uploadedSize == this.totalUploadSize);
+			this.toggleClass('uploading', this.uploading && !completed, this.$.progress);
+			this.toggleClass('completed', completed, this.$.progress);
+			
+			this.updateStyles();
+			this.$.progress.updateStyles();
+		}
+		
+	});
+</script>
