@@ -312,13 +312,24 @@
 				var values = this.value;
 				if (!this.multiple) {
 					values = [];
-					if (this.value)
-						values.push(this.value);
+					if (this.value) {
+						if (Array.isArray(this.value)) {
+							if (this.value.length)
+								values.push(this.value[0]);
+						} else {
+							values.push(this.value);
+						}
+					}
 				} else if (!this.value) {
 					values = [];
 				}
+				
 				var files = [];
 				values.forEach(function(val) {
+					// check if object may need to be deserialized
+					if (typeof val == 'string') {
+						val = JSON.parse(val);
+					}
 					var fileMeta = {};
 					if (val.data && val.data instanceof Blob) {
 						// we have a File blob, yet to be uploaded
