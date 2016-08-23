@@ -37,14 +37,14 @@
 	
 	<template is="dom-bind">
 		
-		<form id="demoForm" is="cbn-form" model method="post" pre-upload-url="upload-url.txt" action="test.json">
+		<form id="demoForm" is="cbn-form" model method="post" pre-upload-url="upload-url.txt" action="test.json" serialization-options='{"mode":"deep"}'>
 			
 			<p>
 				<cbn-paper-file-input name="some_file" label="Single file" show-chips></cbn-paper-file-input>
 			</p>
 			
 			<p>
-				<cbn-paper-file-input name="multi_files" multiple label="Multiple files"></cbn-paper-file-input>
+				<cbn-paper-file-input name="multi_files" multiple label="Multiple files" value="{{fisiere}}"></cbn-paper-file-input>
 			</p>
 			
 			<button type="submit">Submit</button> <button type="reset">Reset</button>
@@ -63,7 +63,12 @@
 	tpl.addEventListener('dom-change', function(){
 		/** @namespace tpl.$.demoForm */
 		var form = tpl.$.demoForm;
-		
+		this.fisiere=[
+			{
+				name:"ceva",
+				blobKey: "tasdasda"
+			}
+		];
 		function updateOutput(event) {
 			if (event) {
 				console.trace('value-changed', event.target.name, event.detail);
