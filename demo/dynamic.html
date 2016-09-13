@@ -2,48 +2,50 @@
 <html>
 <head lang="en">
 	<meta charset="UTF-8">
-	<title>Date Pickers Showcase</title>
+	<title>Dynamic Cbn-File-Input Demo</title>
 	
 	<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 	
 	<link rel="import" href="../../cbn-form/cbn-form.html">
 	<link rel="import" href="../../cbn-form/cbn-dynamic-form.html">
 	<link rel="import" href="../cbn-paper-file-input.html">
+
+	<link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+	<link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
 </head>
 <body>
 
-<div  style="width: 500px; margin: 50px auto;">
-	<h1>Dynamic date picker</h1>
-	
-	<template is="dom-bind">
-		
-		<form id="demoForm" is="cbn-form" model>
-			
-			<cbn-dynamic-form target="light" config="[[formConfig]]"></cbn-dynamic-form>
-			<br />
-			<button type="submit">Submit</button> <button type="reset">Reset</button>
-			
-		</form>
-		
+<div style="margin: 20px auto; width: 500px;">
+	<h1>Dynamic Cbn-File-Input</h1>
+
+	<form id="demoForm" is="cbn-form" model>
+		<demo-snippet class="centered-demo" style="position:relative">
+			<template is="dom-bind">
+				<cbn-dynamic-form target="light" config="[[formConfig]]"></cbn-dynamic-form>
+			</template>
+		</demo-snippet>
+		<br/>
+		<button type="submit">Submit</button> 
+		<button type="reset">Reset</button>
+		<br/>
 		<p style="font-weight: bold;">Output: </p>
 		<pre id="stringifiedJson"></pre>
-		
-	</template>
-
+	</form>
 </div>
 	
 <script>
 	var tpl = document.querySelector('template[is=dom-bind]');
+	var form = document.querySelector('form[is=cbn-form]');
+	var output = document.getElementById('stringifiedJson');
 	
 	tpl.addEventListener('dom-change', function(){
 		/** @namespace tpl.$.demoForm */
-		var form = tpl.$.demoForm;
 		
 		function updateOutput(ev) {
 			if (ev)
 				console.trace('value changed', ev.target.name, ev.detail);
 			/** @namespace tpl.$.stringifiedJson */
-			tpl.$.stringifiedJson.textContent = JSON.stringify(form.model, null, 4);
+			output.textContent = JSON.stringify(form.model, null, 4);
 		}
 		
 		form.addEventListener('value-changed', updateOutput);
@@ -53,8 +55,8 @@
 	tpl.formConfig = {
 		"elements": [
 			{
-				"name": "range1",
-				"label": "Paper Date Range (required)",
+				"name": "file",
+				"label": "file-input (required)",
 				"type": "file",
 				"validation": {
 				},

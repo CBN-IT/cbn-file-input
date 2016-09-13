@@ -14,6 +14,9 @@
 	<link rel="import" href="../../cbn-form/cbn-form.html" />
 	
 	<link rel="import" href="../cbn-paper-file-input.html">
+
+	<link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+	<link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
 	
 	<style>
 		body {
@@ -31,38 +34,36 @@
 	</style>
 </head>
 <body>
-
 <div style="margin: 20px auto; width: 500px;">
 	<h1>Cbn-File-Input Demo</h1>
-	
-	<template is="dom-bind">
-		
-		<form id="demoForm" is="cbn-form" model method="post" pre-upload-url="upload-url.txt" action="test.json" serialization-options='{"mode":"deep"}'>
-			
-			<p>
-				<cbn-paper-file-input name="some_file" label="Single file" show-chips></cbn-paper-file-input>
-			</p>
-			
-			<p>
-				<cbn-paper-file-input name="multi_files" multiple label="Multiple files" value="{{fisiere}}"></cbn-paper-file-input>
-			</p>
-			
-			<button type="submit">Submit</button> <button type="reset">Reset</button>
-		
-		</form>
-		
+
+	<form id="demoForm" is="cbn-form" model method="post" pre-upload-url="upload-url.txt" action="test.json" serialization-options='{"mode":"deep"}'>
+		<demo-snippet class="centered-demo" style="position:relative">
+			<template is="dom-bind">
+				<p>
+					<cbn-paper-file-input name="some_file" label="Single file" show-chips></cbn-paper-file-input>
+				</p>
+
+				<p>
+					<cbn-paper-file-input name="multi_files" multiple label="Multiple files" value="{{fisiere}}"></cbn-paper-file-input>
+				</p>
+			</template>
+		</demo-snippet>
+		<button type="submit">Submit</button> 
+		<button type="reset">Reset</button>
+		<br/>
 		<p style="font-weight: bold;">Output: </p>
 		<pre id="stringifiedJson"></pre>
-	
-	</template>
+	</form>
 </div>
-
+	
 <script>
 	var tpl = document.querySelector('template[is=dom-bind]');
+	var form = document.querySelector('form[is=cbn-form]');
+	var output = document.getElementById('stringifiedJson');
 	
 	tpl.addEventListener('dom-change', function(){
 		/** @namespace tpl.$.demoForm */
-		var form = tpl.$.demoForm;
 		this.fisiere=[
 			{
 				name:"ceva",
@@ -74,7 +75,7 @@
 				console.trace('value-changed', event.target.name, event.detail);
 			}
 			/** @namespace tpl.$.stringifiedJson */
-			tpl.$.stringifiedJson.textContent = JSON.stringify(form.model, null, 4);
+			output.textContent = JSON.stringify(form.model, null, 4);
 		}
 		
 		form.addEventListener('value-changed', updateOutput);
