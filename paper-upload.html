@@ -1,0 +1,137 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-input/paper-input-container.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-file-icons/file-icons.html">
+<!--
+https://github.com/IswPolymerElements/isw-filetype-icon/blob/master/isw-filetype-icon.html
+This one seems nicer
+-->
+
+<dom-module id="paper-upload">
+    <template>
+        <style>
+            #fileInput {
+                height: 0;
+                width: 0;
+                outline: 0;
+                border: 0;
+            }
+
+            label {
+            }
+        </style>
+        <paper-input-container always-float-label>
+            <label slot="label">[[label]]</label>
+            <div slot="input" style="position:relative;height:24px;">
+                <input id="fileInput" name="[[name]]" type="file" on-change="displayFile"/>
+                <label for="fileInput" style="position:absolute;top:0;left:0;right:0;bottom:0;">
+                    <template is="dom-repeat" items="[[fileNames]]">
+                        <span>
+                            <iron-icon icon="[[getIcon(item.type)]]"></iron-icon>
+                            <span style="vertical-align: middle;">[[item.name]]</span>
+                            <span style="vertical-align: middle;color: #505050;">([[formatSize(item.size)]])</span>
+                        </span>
+                    </template>
+                </label>
+            </div>
+        </paper-input-container>
+    </template>
+
+    <script>
+        /**
+         * `paper-upload`
+         *
+         *
+         * @customElement
+         * @polymer
+         * @demo demo/index.html
+         */
+        class PaperUpload extends Polymer.Element {
+            static get is() {
+                return 'paper-upload';
+            }
+
+            static get properties() {
+                return {
+                    label: {
+                        type: String,
+                        value: 'Upload file'
+                    },
+                    name: {
+                        type: String,
+                        value: 'upload'
+                    },
+                    value: {
+                        type: Object
+                    },
+                    fileNames: {
+                        type: Array,
+                        value: function () {
+                            return [];
+                        }
+                    },
+                    required:{
+                        type:Boolean,
+                        value:false
+                    }
+                };
+            }
+
+            displayFile(event) {
+                let input = event.path[0];
+                console.log('Selected file: ' + input.files.item(0).name);
+                console.log('Selected file: ' + input.files.item(0).size);
+                console.log('Selected file: ' + input.files.item(0).type);
+                this.value = input.files[0];
+                let arr = [];
+                for (let i = 0; i < input.files.length; i++) {
+                    arr.push({
+                        name: input.files.item(i).name,
+                        size: input.files.item(i).size,
+                        type: input.files.item(i).type
+                    });
+                }
+                this.fileNames = arr;
+            }
+
+            formatSize(value) {
+                if (value < 1024) {
+                    return value + "B"
+                } else if (value / 1024 < 1024) {
+                    return parseInt(value / 1024) + "KB"
+                } else if (value / (1024 * 1024) < 1024) {
+                    return parseInt(value / (1024 * 1024)) + "MB"
+                } else if (value / (1024 * 1024 * 1024) < 1024) {
+                    return parseInt(value / (1024 * 1024 * 1024)) + "GB"
+                } else if (value / (1024 * 1024 * 1024 * 1024) < 1024) {
+                    return parseInt(value / (1024 * 1024 * 1024 * 1024)) + "TB"
+                } else {
+                    return parseInt(value / (1024 * 1024 * 1024 * 1024 * 1024)) + "PB"
+                }
+            }
+
+            getIcon(type) {
+                if (type.indexOf("video/") >= 0) {
+                    return "file:video"
+                } else if (type.indexOf("audio/") >= 0) {
+                    return "file:audio"
+                } else if (type.indexOf("image/") >= 0) {
+                    return "file:image"
+                } else if (type === "application/pdf") {
+                    return "file:pdf"
+                } else if (type === "application/vnd.ms-excel" || type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+                    return "file:excel"
+                } else {
+                    return "file:generic"
+                }
+                //
+                //application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+            }
+            validate(){
+                return (!this.required || this.value.length>0);
+            }
+        }
+
+        window.customElements.define(PaperUpload.is, PaperUpload);
+    </script>
+</dom-module>
