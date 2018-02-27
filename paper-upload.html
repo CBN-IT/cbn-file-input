@@ -25,7 +25,7 @@ This one seems nicer
             <div slot="input" style="position:relative;height:24px;">
                 <input id="fileInput" multiple$="[[multiple]]" name="[[name]]" type="file" on-change="displayFile"/>
                 <label for="fileInput" style="position:absolute;top:0;left:0;right:0;bottom:0;">
-                    <template is="dom-repeat" items="[[fileNames]]">
+                    <template is="dom-repeat" items="[[value]]">
                         <span>
                             <iron-icon icon="[[getIcon(item.type)]]"></iron-icon>
                             <span style="vertical-align: middle;">[[item.name]]</span>
@@ -62,9 +62,6 @@ This one seems nicer
                         value: 'upload'
                     },
                     value: {
-                        type: Object
-                    },
-                    fileNames: {
                         type: Array,
                         value: function () {
                             return [];
@@ -86,23 +83,23 @@ This one seems nicer
                 console.log('Selected file: ' + input.files.item(0).name);
                 console.log('Selected file: ' + input.files.item(0).size);
                 console.log('Selected file: ' + input.files.item(0).type);
-                this.value = input.files[0];
+                //this.value = input.files[0];
                 let arr = [];
                 for (let i = 0; i < input.files.length; i++) {
                     arr.push({
                         name: input.files.item(i).name,
                         size: input.files.item(i).size,
                         type: input.files.item(i).type,
-                        blobKey: undefined,
-                        file:input.files[0]
+                        file:input.files[i],
+                        blobKey:undefined
                     });
                 }
-                this.fileNames = arr;
+                this.value = arr;
                 this.dispatchEvent(new CustomEvent("value-changed", {
                     bubbles: true,
                     composed: true,
                     detail:{
-                        value:this.fileNames
+                        value:this.value
                     }
                 }));
             }
