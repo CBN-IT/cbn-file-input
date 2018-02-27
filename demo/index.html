@@ -26,8 +26,21 @@
           <iron-form>
             <form method="post" action="" enctype="multipart/form-data">
               <paper-upload></paper-upload>
+              <input type="submit" />
             </form>
           </iron-form>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic paper-upload demo</h3>
+      <demo-snippet>
+        <template>
+            <form method="post" action="" enctype="multipart/form-data" onsubmit="event.preventDefault()">
+              <paper-upload></paper-upload>
+              <input type="submit" />
+            </form>
         </template>
       </demo-snippet>
     </div>

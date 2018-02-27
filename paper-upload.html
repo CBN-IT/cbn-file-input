@@ -23,7 +23,7 @@ This one seems nicer
         <paper-input-container always-float-label>
             <label slot="label">[[label]]</label>
             <div slot="input" style="position:relative;height:24px;">
-                <input id="fileInput" name="[[name]]" type="file" on-change="displayFile"/>
+                <input id="fileInput" multiple$="[[multiple]]" name="[[name]]" type="file" on-change="displayFile"/>
                 <label for="fileInput" style="position:absolute;top:0;left:0;right:0;bottom:0;">
                     <template is="dom-repeat" items="[[fileNames]]">
                         <span>
@@ -73,6 +73,10 @@ This one seems nicer
                     required:{
                         type:Boolean,
                         value:false
+                    },
+                    multiple:{
+                        type:Boolean,
+                        value:false
                     }
                 };
             }
@@ -88,10 +92,19 @@ This one seems nicer
                     arr.push({
                         name: input.files.item(i).name,
                         size: input.files.item(i).size,
-                        type: input.files.item(i).type
+                        type: input.files.item(i).type,
+                        blobKey: undefined,
+                        file:input.files[0]
                     });
                 }
                 this.fileNames = arr;
+                this.dispatchEvent(new CustomEvent("value-changed", {
+                    bubbles: true,
+                    composed: true,
+                    detail:{
+                        value:this.fileNames
+                    }
+                }));
             }
 
             formatSize(value) {
