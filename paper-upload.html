@@ -2,6 +2,7 @@
 <link rel="import" href="../paper-input/paper-input-container.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-file-icons/file-icons.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
 <!--
 https://github.com/IswPolymerElements/isw-filetype-icon/blob/master/isw-filetype-icon.html
 This one seems nicer
@@ -15,26 +16,71 @@ This one seems nicer
                 width: 0;
                 outline: 0;
                 border: 0;
+                overflow: hidden;
             }
 
             label {
             }
+            .container{
+                color: #333333;
+                background: #E7E7E7;
+                padding: 0 0.3em 0 0.2em;
+                margin: 0.1em 0.2em 0.15em 0;
+                vertical-align: middle;
+                cursor: pointer;
+                border-radius: 0.7em;
+                /*overflow: hidden;*/
+                white-space: nowrap;
+                max-width: 100%;
+                display: flex;
+                align-items: center;
+            }
+            .container>span{
+                /*vertical-align: middle;*/
+            }
+            .closeBtn{
+                flex-shrink: 0;
+                width: 16px;
+                height: 16px;
+                margin-left: 3px;
+            }
+            .fileSize{
+                color: #505050;
+                flex-shrink: 0;
+            }
+            .fileExtension{
+                flex-shrink: 0;
+            }
+            .fileName{
+                flex: 1;
+                flex-basis: 1px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+            .fileIcon{
+                flex-shrink: 0;
+            }
         </style>
-        <paper-input-container always-float-label>
-            <label slot="label">[[label]]</label>
-            <div slot="input" style="position:relative;height:24px;">
-                <input id="fileInput" multiple$="[[multiple]]" name="[[name]]" type="file" on-change="displayFile"/>
-                <label for="fileInput" style="position:absolute;top:0;left:0;right:0;bottom:0;">
-                    <template is="dom-repeat" items="[[value]]">
-                        <span>
-                            <iron-icon icon="[[getIcon(item.type)]]"></iron-icon>
-                            <span style="vertical-align: middle;">[[item.name]]</span>
-                            <span style="vertical-align: middle;color: #505050;">([[formatSize(item.size)]])</span>
-                        </span>
-                    </template>
-                </label>
-            </div>
-        </paper-input-container>
+        <input id="fileInput" multiple$="[[multiple]]" name="[[name]]" type="file" on-change="displayFile"/>
+        <label for="fileInput">
+            <paper-input-container always-float-label>
+                <label for="fileInput" slot="label">[[label]]</label>
+                <div slot="input" style="position:relative;min-height:24px;display:flex;flex-direction: column;">
+                    <input type="hidden" />
+                    <div style="flex:1;display: flex;flex-wrap: wrap;">
+                        <template is="dom-repeat" items="[[value]]">
+                            <span class="container" on-click="preventDefault">
+                                <iron-icon class="fileIcon" icon="[[getIcon(item.type)]]"></iron-icon>
+                                <span class="fileName">[[noExtension(item.name)]]</span>
+                                <span class="fileExtension">[[extension(item.name)]]</span>
+                                <span class="fileSize" >([[formatSize(item.size)]])</span>
+                                <iron-icon class="closeBtn" icon="icons:backspace" on-click="remove"></iron-icon>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+            </paper-input-container>
+        </label>
     </template>
 
     <script>
@@ -80,26 +126,22 @@ This one seems nicer
 
             displayFile(event) {
                 let input = event.path[0];
-                console.log('Selected file: ' + input.files.item(0).name);
-                console.log('Selected file: ' + input.files.item(0).size);
-                console.log('Selected file: ' + input.files.item(0).type);
                 //this.value = input.files[0];
-                let arr = [];
                 for (let i = 0; i < input.files.length; i++) {
-                    arr.push({
+                    this.push("value", {
                         name: input.files.item(i).name,
                         size: input.files.item(i).size,
                         type: input.files.item(i).type,
-                        file:input.files[i],
-                        blobKey:undefined
+                        file: input.files[i],
+                        blobKey: undefined
                     });
                 }
-                this.value = arr;
+                input.value = null;
                 this.dispatchEvent(new CustomEvent("value-changed", {
                     bubbles: true,
                     composed: true,
-                    detail:{
-                        value:this.value
+                    detail: {
+                        value: this.value
                     }
                 }));
             }
@@ -139,6 +181,32 @@ This one seems nicer
             }
             validate(){
                 return (!this.required || this.value.length>0);
+            }
+            noExtension(name){
+                let extensionPos=name.lastIndexOf(".");
+                if(extensionPos>=0 && name.length>8) {
+                    return name.substr(0, name.length - 8);
+                }else{
+                    return name;
+                }
+            }
+            extension(name){
+                let extensionPos=name.lastIndexOf(".");
+                if(extensionPos>=0 && name.length>8) {
+                    return name.substr(name.length -8);
+                }else{
+                    return "";
+                }
+            }
+            remove(event){
+                console.log(event.model.index,event.model.item);
+                this.splice("value", event.model.index,1);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            preventDefault(event){
+                event.stopPropagation();
+                event.preventDefault();
             }
         }
 

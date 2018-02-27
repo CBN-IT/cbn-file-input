@@ -5,7 +5,8 @@
     "polymer": "Polymer/polymer#^2.0.0",
     "paper-input": "^2.1.1",
     "iron-file-icons": "^2.0.2",
-    "iron-icon": "^2.1.0"
+    "iron-icon": "^2.1.0",
+    "iron-icons": "^2.1.0"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
