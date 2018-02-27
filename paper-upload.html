@@ -127,14 +127,24 @@ This one seems nicer
             displayFile(event) {
                 let input = event.path[0];
                 //this.value = input.files[0];
-                for (let i = 0; i < input.files.length; i++) {
-                    this.push("value", {
-                        name: input.files.item(i).name,
-                        size: input.files.item(i).size,
-                        type: input.files.item(i).type,
-                        file: input.files[i],
+                if (this.multiple) {
+                    for (let i = 0; i < input.files.length; i++) {
+                        this.push("value", {
+                            name: input.files.item(i).name,
+                            size: input.files.item(i).size,
+                            type: input.files.item(i).type,
+                            file: input.files[i],
+                            blobKey: undefined
+                        });
+                    }
+                } else {
+                    this.value = [{
+                        name: input.files.item(0).name,
+                        size: input.files.item(0).size,
+                        type: input.files.item(0).type,
+                        file: input.files[0],
                         blobKey: undefined
-                    });
+                    }]
                 }
                 input.value = null;
                 this.dispatchEvent(new CustomEvent("value-changed", {
