@@ -111,7 +111,8 @@ This one seems nicer
                         type: Array,
                         value: function () {
                             return [];
-                        }
+                        },
+                        observer:"valueChanged"
                     },
                     required:{
                         type:Boolean,
@@ -123,6 +124,25 @@ This one seems nicer
                     }
                 };
             }
+
+            valueChanged(newValue){
+                if(typeof this.value === 'string'){
+                    if(this.value !== "") {
+                        this.value = [this.value];
+                    }else if(this.value === ""){
+                        this.value = [];
+                    }
+                } else {
+                    this.dispatchEvent(new CustomEvent("selected-changed", {
+                        bubbles: true,
+                        composed: true,
+                        detail: {
+                            value: this.value
+                        }
+                    }));
+                }
+            }
+
 
             displayFile(event) {
                 let input = event.path[0];
