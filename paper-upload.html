@@ -133,6 +133,11 @@ This one seems nicer
                         this.value = [];
                     }
                 } else {
+                    for(let i=0; i< this.value.length; i++){
+                        if(typeof this.value[i] === 'string'){
+                            this.set("value." + i, JSON.parse(this.value[i]));
+                        }
+                    }
                     this.dispatchEvent(new CustomEvent("selected-changed", {
                         bubbles: true,
                         composed: true,
@@ -193,7 +198,9 @@ This one seems nicer
             }
 
             getIcon(type) {
-                if (type.indexOf("video/") >= 0) {
+                if(type === undefined){
+                    return "file:generic"
+                } else if (type.indexOf("video/") >= 0) {
                     return "file:video"
                 } else if (type.indexOf("audio/") >= 0) {
                     return "file:audio"
